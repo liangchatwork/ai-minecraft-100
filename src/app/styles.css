@@ -1,0 +1,479 @@
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#app {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+  background: #111;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+canvas {
+  display: block;
+}
+
+.crosshair {
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  width: 18px;
+  height: 18px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.crosshair::before,
+.crosshair::after {
+  content: "";
+  position: absolute;
+  background: rgba(255, 255, 255, 0.92);
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.7);
+}
+
+.crosshair::before {
+  left: 8px;
+  top: 0;
+  width: 2px;
+  height: 18px;
+}
+
+.crosshair::after {
+  left: 0;
+  top: 8px;
+  width: 18px;
+  height: 2px;
+}
+
+.control-hint {
+  position: fixed;
+  left: 16px;
+  top: 16px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  color: white;
+  line-height: 1.55;
+  font-size: 14px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+  pointer-events: none;
+}
+
+.hotbar {
+  position: fixed;
+  left: 50%;
+  bottom: 24px;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 6px;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(8px);
+}
+
+.hotbar-slot {
+  position: relative;
+  width: 54px;
+  height: 54px;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.hotbar-slot-selected {
+  border-color: rgba(255, 255, 255, 0.95);
+  transform: translateY(-3px);
+}
+
+.hotbar-key {
+  position: absolute;
+  left: 5px;
+  top: 3px;
+  color: rgba(255, 255, 255, 0.72);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.hotbar-block {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: 26px;
+  height: 26px;
+  border-radius: 5px;
+  transform: translate(-50%, -50%);
+  background: var(--block-color);
+  box-shadow:
+    inset 4px 4px rgba(255, 255, 255, 0.22),
+    inset -4px -4px rgba(0, 0, 0, 0.18);
+}
+
+.hotbar-count {
+  position: absolute;
+  right: 5px;
+  bottom: 3px;
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  text-shadow: 0 1px 3px black;
+}
+
+.inventory-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 50;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.28);
+  pointer-events: auto;
+  user-select: none;
+}
+
+.inventory-panel-classic {
+  width: min(760px, calc(100vw - 24px));
+  padding: 16px;
+  border: 4px solid #1f1f1f;
+  border-radius: 4px;
+  background: #c6c6c6;
+  box-shadow:
+    inset 3px 3px #ffffff,
+    inset -3px -3px #555555,
+    0 20px 80px rgba(0, 0, 0, 0.45);
+  image-rendering: pixelated;
+}
+
+.inventory-top {
+  display: grid;
+  grid-template-columns: 180px 1fr 260px;
+  gap: 18px;
+  align-items: stretch;
+  margin-bottom: 16px;
+}
+
+.classic-section-title {
+  margin-bottom: 8px;
+  color: #303030;
+  font-size: 13px;
+  font-weight: 900;
+  text-shadow: 1px 1px #eeeeee;
+}
+
+.classic-recipe-book {
+  min-height: 150px;
+  padding: 10px;
+  border: 3px solid #555555;
+  background: #a8a8a8;
+  box-shadow:
+    inset 2px 2px #eeeeee,
+    inset -2px -2px #666666;
+}
+
+.classic-recipe-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.classic-recipe-button {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-height: 42px;
+  padding: 7px;
+  border: 2px solid #3f3f3f;
+  color: #202020;
+  background: #d6d6d6;
+  box-shadow:
+    inset 2px 2px #ffffff,
+    inset -2px -2px #777777;
+  font-weight: 900;
+  text-align: left;
+  cursor: pointer;
+}
+
+.classic-recipe-button small {
+  color: #555555;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.classic-recipe-button:hover:not(:disabled) {
+  background: #e5e5e5;
+}
+
+.classic-recipe-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.classic-player-area {
+  position: relative;
+  display: grid;
+  grid-template-columns: 52px 1fr 52px;
+  gap: 10px;
+  min-height: 178px;
+  padding: 10px;
+  border: 3px solid #555555;
+  background: #9f9f9f;
+  box-shadow:
+    inset 2px 2px #eeeeee,
+    inset -2px -2px #666666;
+}
+
+.classic-armor-column {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.classic-ghost-slot,
+.classic-slot {
+  position: relative;
+  width: 42px;
+  height: 42px;
+  border: 3px solid #373737;
+  background: #8b8b8b;
+  box-shadow:
+    inset 2px 2px #373737,
+    inset -2px -2px #ffffff;
+}
+
+.classic-ghost-slot {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #676767;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.classic-offhand {
+  align-self: end;
+}
+
+.classic-player-preview {
+  position: relative;
+  min-height: 148px;
+  border: 3px solid #373737;
+  background:
+    linear-gradient(#7fb7ff, #b7ddff 50%, #75a65a 50%);
+  box-shadow:
+    inset 2px 2px #373737,
+    inset -2px -2px #ffffff;
+}
+
+.classic-player-head,
+.classic-player-body,
+.classic-player-arm,
+.classic-player-leg {
+  position: absolute;
+  left: 50%;
+  background: #3f7fd6;
+  border: 2px solid rgba(0, 0, 0, 0.35);
+  transform: translateX(-50%);
+}
+
+.classic-player-head {
+  top: 20px;
+  width: 28px;
+  height: 28px;
+  background: #d2a679;
+}
+
+.classic-player-body {
+  top: 50px;
+  width: 34px;
+  height: 44px;
+}
+
+.classic-player-arm {
+  top: 52px;
+  width: 13px;
+  height: 42px;
+  background: #d2a679;
+}
+
+.classic-player-arm.left {
+  left: calc(50% - 30px);
+}
+
+.classic-player-arm.right {
+  left: calc(50% + 30px);
+}
+
+.classic-player-leg {
+  top: 95px;
+  width: 14px;
+  height: 42px;
+  background: #2d4f9f;
+}
+
+.classic-player-leg.left {
+  left: calc(50% - 9px);
+}
+
+.classic-player-leg.right {
+  left: calc(50% + 9px);
+}
+
+.classic-crafting-area {
+  min-height: 178px;
+  padding: 10px;
+  border: 3px solid #555555;
+  background: #a8a8a8;
+  box-shadow:
+    inset 2px 2px #eeeeee,
+    inset -2px -2px #666666;
+}
+
+.classic-crafting-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.classic-crafting-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 42px);
+  gap: 6px;
+}
+
+.classic-crafting-arrow {
+  color: #505050;
+  font-size: 28px;
+  font-weight: 900;
+}
+
+.classic-result-slot {
+  width: 50px;
+  height: 50px;
+}
+
+.classic-result-ready {
+  outline: 3px solid rgba(255, 255, 255, 0.85);
+}
+
+.classic-main-inventory {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.classic-grid {
+  display: grid;
+  grid-template-columns: repeat(9, 42px);
+  gap: 6px;
+  justify-content: center;
+}
+
+.classic-hotbar-grid {
+  margin-top: 4px;
+}
+
+.classic-slot {
+  cursor: pointer;
+}
+
+.classic-slot:hover {
+  filter: brightness(1.1);
+}
+
+.classic-slot-selected {
+  outline: 3px solid #ffffff;
+  outline-offset: 1px;
+}
+
+.classic-hotbar-slot {
+  background: #939393;
+}
+
+.classic-drag-target {
+  outline: 3px solid #f7f7a6;
+  outline-offset: 1px;
+}
+
+.classic-item-icon {
+  position: absolute;
+  left: 50%;
+  top: 48%;
+  width: 26px;
+  height: 26px;
+  border-radius: 2px;
+  transform: translate(-50%, -50%);
+  background: var(--block-color);
+  box-shadow:
+    inset 5px 5px rgba(255, 255, 255, 0.26),
+    inset -5px -5px rgba(0, 0, 0, 0.24);
+}
+
+.classic-item-count {
+  position: absolute;
+  right: 3px;
+  bottom: 0;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow:
+    2px 2px #222222,
+    1px 1px #222222;
+}
+
+.inventory-cursor {
+  position: fixed;
+  z-index: 999;
+  width: 46px;
+  height: 46px;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+.inventory-cursor .classic-item-icon {
+  width: 30px;
+  height: 30px;
+}
+
+.inventory-hint {
+  margin-top: 12px;
+  color: #2f2f2f;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+}
+
+@media (max-width: 800px) {
+  .inventory-panel-classic {
+    max-height: calc(100vh - 24px);
+    overflow-y: auto;
+  }
+
+  .inventory-top {
+    grid-template-columns: 1fr;
+  }
+
+  .classic-grid {
+    grid-template-columns: repeat(9, 32px);
+    gap: 4px;
+  }
+
+  .classic-slot,
+  .classic-ghost-slot {
+    width: 32px;
+    height: 32px;
+  }
+
+  .classic-item-icon {
+    width: 21px;
+    height: 21px;
+  }
+
+  .classic-crafting-grid {
+    grid-template-columns: repeat(2, 36px);
+  }
+}
